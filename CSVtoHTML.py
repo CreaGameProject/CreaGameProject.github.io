@@ -401,5 +401,5 @@ resulttxt+=wholeString[1]
 
 print(resulttxt)
 
-with open(os.path.dirname(__file__)+'/index.', mode='w') as f:
+with open(os.path.dirname(__file__)+'/index.html', mode='w') as f:
     f.write(resulttxt)
