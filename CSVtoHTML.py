@@ -1,0 +1,405 @@
+import sys
+import os
+import re
+import csv
+import urllib.error
+import urllib.request
+
+def download_file(url, dst_path):
+    try:
+        with urllib.request.urlopen(url) as web_file:
+            data = web_file.read()
+            with open(dst_path, mode='wb') as local_file:
+                local_file.write(data)
+    except urllib.error.URLError as e:
+        print(e)
+
+#sampleURL https://drive.google.com/open?id=1hoCCOf_Mmd9yhFFI4ECzImlx52K1dyut
+def urlConv(url):
+    if 'id=' in url:
+        id=url.split('id=')[1]
+        return 'https://drive.google.com/uc?id='+id
+
+
+#引数一覧
+replacedNames=['displayName','coments','DepartmentsName','imageName','links']
+
+departmentDict={
+    "プログラマー" : "prog",
+    "デザイナー" : "des",
+    "サウンド" : "sound",
+    "プランナー" : "plan",
+    "3D" : "3d",
+    "未定" : "",
+}
+
+wholeString=['''<!DOCTYPE html>
+<html lang="ja" class="no-js">
+    <!-- Begin Head -->
+    <head>
+        <!-- Basic -->
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>CGPmember</title>
+        
+        <!-- Web Fonts -->
+        <link href="https://fonts.googleapis.com/css?family=Lato:300,400,400i|Montserrat:400,700" rel="stylesheet">
+
+        <!-- Vendor Styles -->
+        <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+        <link href="css/animate.css" rel="stylesheet" type="text/css"/>
+        <link href="vendor/themify/themify.css" rel="stylesheet" type="text/css"/>
+        <link href="vendor/scrollbar/scrollbar.min.css" rel="stylesheet" type="text/css"/>
+        <link href="vendor/swiper/swiper.min.css" rel="stylesheet" type="text/css"/>
+        <link href="vendor/cubeportfolio/css/cubeportfolio.min.css" rel="stylesheet" type="text/css"/>
+
+        <!-- Theme Styles -->
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <link href="css/global/global.css" rel="stylesheet" type="text/css"/>
+
+        <!-- Favicon -->
+        <!--
+        <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+        <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+        -->
+    </head>
+    <!-- End Head -->
+
+    <!-- Body --> <!-- Bootstrapなどで構成されたテンプレを調整したものです。基本ここからはItem要素コピペで自己紹介できます。なにか面白いことしたければ、↑の global.css 覗いてみてください。-->
+    <body>
+
+        <!--========== HEADER ==========-->
+        <header class="navbar-fixed-top s-header js__header-sticky js__header-overlay">
+            <!-- Navbar -->
+            <div class="s-header__navbar">
+                <div class="s-header__container">
+                    <div class="s-header__navbar-row">
+                        <div class="s-header__navbar-row-col">
+                            <!-- Logo -->
+                            <!--
+                            <div class="s-header__logo">
+                                <a href="xxx" class="s-header__logo-link">
+                                    <img class="s-header__logo-img" src="img/dark_logo.png" alt="Logo">
+                                </a>
+                            </div>
+                            -->
+                            <!-- End Logo -->
+                        </div>
+                        <div class="s-header__navbar-row-col">
+                            <!-- Trigger -->
+                            <a href="javascript:void(0);" class="s-header__trigger s-header__trigger--dark js__trigger">
+                                <span class="s-header__trigger-icon"></span>
+                                <svg x="0rem" y="0rem" width="3.125rem" height="3.125rem" viewbox="0 0 54 54">
+                                    <circle fill="transparent" stroke="#fff" stroke-width="1" cx="27" cy="27" r="25" stroke-dasharray="157 157" stroke-dashoffset="157"></circle>
+                                </svg>
+                            </a>
+                            <!-- End Trigger -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Navbar -->
+
+            <!-- Overlay -->
+            <div class="s-header-bg-overlay js__bg-overlay">      
+                <!-- Nav -->
+                <nav class="s-header__nav js__scrollbar">
+                    <div class="container-fluid">
+                        <!-- Menu List -->        
+                        <ul class="list-unstyled s-header__nav-menu">
+                            <li class="s-header__nav-menu-item"><a class="s-header__nav-menu-link s-header__nav-menu-link-divider -is-active" href="https://creagameproject.github.io/">Index</a></li>
+                            <li class="s-header__nav-menu-item"><a class="s-header__nav-menu-link s-header__nav-menu-link-divider" href="https://creagamep.wixsite.com/creagamep">ホームページ</a></li>
+                            <li class="s-header__nav-menu-item"><a class="s-header__nav-menu-link s-header__nav-menu-link-divider" href="https://twitter.com/CGP_wakayama">Twitter</a></li>
+                        </ul>
+                        <!-- End Menu List -->
+                    </div>
+                </nav>
+                <!-- End Nav -->
+            </div>
+            <!-- End Overlay -->
+        </header>
+        <!--========== END HEADER ==========-->
+
+        <!--========== PROMO BLOCK ==========-->
+        <div class="g-bg-color--sky-light">
+            <div class="container g-padding-y-125--xs">
+                <div class="g-padding-y-50--xs">
+                    <h1 class="g-font-size-35--xs g-font-size-55--sm g-font-size-70--lg">CGPのメンバー紹介</h1>
+                    <p class="g-font-size-22--xs g-font-size-24--md g-margin-b-0--xs">文字通り、イカれたメンバーを紹介するぜぇえ！！<br>
+                    ちなみに、下に書いてある部門をクリックすると、メンバーを絞れるよ。画像の上でホバーすると詳細が表示されます。</p>
+                </div>
+            </div>
+        </div>
+        <!--========== END PROMO BLOCK ==========-->
+
+        <!--========== PAGE CONTENT ==========-->
+        <!-- Portfolio Filter -->
+        <div class="container g-padding-y-100--xs">
+            <div class="s-portfolio">
+                <div id="js__filters-portfolio-gallery" class="s-portfolio__filter-v1 cbp-l-filters-text cbp-l-filters-center">
+                    <div data-filter="*" class="s-portfolio__filter-v1-item cbp-filter-item cbp-filter-item-active">Show All</div>
+                    <div data-filter=".prog" class="s-portfolio__filter-v1-item cbp-filter-item">プログラマ</div>
+                    <div data-filter=".des" class="s-portfolio__filter-v1-item cbp-filter-item">デザイナ</div>
+                    <div data-filter=".sound" class="s-portfolio__filter-v1-item cbp-filter-item">サウンドクリエイター</div>
+                    <div data-filter=".3d" class="s-portfolio__filter-v1-item cbp-filter-item">3Dグラフィッカー</div>
+                    <div data-filter=".plan" class="s-portfolio__filter-v1-item cbp-filter-item">プランナー</div>
+                </div>
+            </div>
+        </div>
+        <!-- End Portfolio Filter -->
+
+        <!-- Portfolio Gallery -->　<!-- Item　をコピペしてください！-->
+        <div class="container">
+            <div id="js__grid-portfolio-gallery" class="cbp">
+                <!-- Item０ -->
+                <!--部門は例にならって記入してください！！　↓ これらのこと。-->
+                <div class="s-portfolio__item cbp-item">
+                    <div class="s-portfolio__img-effect">
+                        <img src="img/CGPchan.jpg" alt="CGPchan">
+                    </div>
+                    <div class="s-portfolio__caption-hover--cc">
+                        <div class="g-margin-b-25--xs">
+                            <h2 class="g-font-size-18--xs g-color--white g-margin-b-5--xs">CGPちゃん</h2>
+                            <p class="g-color--white-opacity">今、あなたの後ろにいるの。<br>よかったら私の動画↓↓↓見てね</p>
+                        </div>
+                        <ul class="list-inline g-ul-li-lr-5--xs g-margin-b-0--xs">
+                            <li>
+                                <a href="img/CGPchan.jpg" class="cbp-lightbox s-icon s-icon--sm s-icon--white-bg g-radius--circle" data-title="CGPちゃん">
+                                    <i class="ti-fullscreen"></i>
+                                </a>
+                            </li>
+
+                            <!--なにかみせたいリンクがあればここに。なければ li ごと消してください。-->
+                            <li>
+                                <a href="https://drive.google.com/file/d/1lrMqKVi1TlNi2N8bdFkS55UkUaDRwJog/view?usp=sharing" class="s-icon s-icon--sm s-icon s-icon--white-bg g-radius--circle">
+                                    <i class="ti-link"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Item１ -->
+                <!--部門は例にならって記入してください！！　↓ これらのこと。-->
+                <div class="s-portfolio__item cbp-item des sound plan">
+                    <div class="s-portfolio__img-effect">
+                        <img src="img/yamaso.jpg" alt="yamaso">
+                    </div>
+                    <div class="s-portfolio__caption-hover--cc">
+                        <div class="g-margin-b-25--xs">
+                            <h2 class="g-font-size-18--xs g-color--white g-margin-b-5--xs">やまそうです。</h2>
+                            <p class="g-color--white-opacity">代表してます。<br>人と飯食うのが好きです。ガンダムも好きです。MDメジャーです。企画と音とデザインがメイン？？　教えてｗ<br>
+                            リンクからHP見れます。</p>
+                        </div>
+                        <ul class="list-inline g-ul-li-lr-5--xs g-margin-b-0--xs">
+                            <li>
+                                <a href="img/yamaso.jpg" class="cbp-lightbox s-icon s-icon--sm s-icon--white-bg g-radius--circle" data-title="やまそう <br/> by Yamaso">
+                                    <i class="ti-fullscreen"></i>
+                                </a>
+                            </li>
+
+                            <!--なにかみせたいリンクがあればここに。なければ li ごと消してください。-->
+                            <li>
+                                <a href="https://yamaso.github.io" class="s-icon s-icon--sm s-icon s-icon--white-bg g-radius--circle">
+                                    <i class="ti-link"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Item２ -->
+                <!--部門は例にならって記入してください！！　↓ これらのこと。-->
+                <div class="s-portfolio__item cbp-item prog">
+                    <div class="s-portfolio__img-effect">
+                        <img src="img/omori.JPG" alt="omori">
+                    </div>
+                    <div class="s-portfolio__caption-hover--cc">
+                        <div class="g-margin-b-25--xs">
+                            <h3 class="g-font-size-18--xs g-color--white g-margin-b-5--xs">大森</h3>
+                            <p class="g-color--white-opacity">これでも副代表です。<br>代表の心のケアを主に担当してます。(本当は代表にCGPでやったらいいこととか進言してるよ)プログラマーだけどよくわかりません。でも質問があれば受け付けます(C,C++,C#,Python)。NIメジャーです。</p>
+                        </div>
+                        <ul class="list-inline g-ul-li-lr-5--xs g-margin-b-0--xs">
+                            <li>
+                                <a href="img/omori.JPG" class="cbp-lightbox s-icon s-icon--sm s-icon--white-bg g-radius--circle" data-title="大森 <br/> by 近澤">
+                                    <i class="ti-fullscreen"></i>
+                                </a>
+                            </li>
+
+                            <!--なにかみせたいリンクがあればここに。なければ li ごと消してください。-->
+                            <!--
+                            <li>
+                                <a href="" class="s-icon s-icon--sm s-icon s-icon--white-bg g-radius--circle">
+                                    <i class="ti-link"></i>
+                                </a>
+                            </li>
+                            -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Item３ -->
+                <!--部門は例にならって記入してください！！　↓ これらのこと。-->
+                <div class="s-portfolio__item cbp-item prog">
+                    <div class="s-portfolio__img-effect">
+                        <img src="img/waineko.jpg" alt="Yuga(Pr)">
+                    </div>
+                    <div class="s-portfolio__caption-hover--cc">
+                        <div class="g-margin-b-25--xs">
+                            <h4 class="g-font-size-18--xs g-color--white g-margin-b-5--xs">キタバヤシです。</h4>
+                            <p class="g-color--white-opacity">プログラマー部門所属のあのキタバヤシです。<br>IIメジャーです。よくUnityで遊んでます。<br>周りからは「暇人」に見えてるらしい。<br>いや、暇じゃないから。</p>
+                        </div>
+                        <ul class="list-inline g-ul-li-lr-5--xs g-margin-b-0--xs">
+                            <li>
+                                <a href="img/waineko.jpg" class="cbp-lightbox s-icon s-icon--sm s-icon--white-bg g-radius--circle" data-title="ワイは猫やで。略してワイ猫。">
+                                    <i class="ti-fullscreen"></i>
+                                </a>
+                            </li>
+
+                            <!--なにかみせたいリンクがあればここに。なければ li ごと消してください。-->
+                        </ul>
+                    </div>
+                </div>
+''',
+'''
+                <!-- End Item -->
+            </div>
+            <!-- End Portfolio Gallery -->
+        </div>
+        <!-- End Portfolio -->
+        <!--========== END PAGE CONTENT ==========-->
+
+        <!--========== FOOTER ==========-->
+        <footer class="g-bg-color--dark">
+            <!-- Links -->
+            <div class="g-hor-divider__dashed--white-opacity-lightest">
+                <div class="container g-padding-y-80--xs">
+                    <div class="row">
+                        <div class="col-sm-2 g-margin-b-20--xs g-margin-b-0--md">
+                            <ul class="list-unstyled g-ul-li-tb-5--xs g-margin-b-0--xs">
+                                <li><a class="g-font-size-15--xs g-color--white-opacity" href="https://twitter.com/CGP_wakayama">Twitter</a></li>
+                                <li><a class="g-font-size-15--xs g-color--white-opacity" href="https://creagamep.wixsite.com/creagamep">ホームページ</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Links -->
+
+        </footer>
+        <!--========== END FOOTER ==========-->
+
+        <!-- Back To Top -->
+        <a href="javascript:void(0);" class="s-back-to-top js__back-to-top"></a>
+
+        <!--========== JAVASCRIPTS (Load javascripts at bottom, this will reduce page load time) ==========-->
+        <!-- Vendor -->
+        <script type="text/javascript" src="vendor/jquery.min.js"></script>
+        <script type="text/javascript" src="vendor/jquery.migrate.min.js"></script>
+        <script type="text/javascript" src="vendor/bootstrap/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="vendor/jquery.smooth-scroll.min.js"></script>
+        <script type="text/javascript" src="vendor/jquery.back-to-top.min.js"></script>
+        <script type="text/javascript" src="vendor/scrollbar/jquery.scrollbar.min.js"></script>
+        <script type="text/javascript" src="vendor/swiper/swiper.jquery.min.js"></script>
+        <script type="text/javascript" src="vendor/cubeportfolio/js/jquery.cubeportfolio.min.js"></script>
+        <script type="text/javascript" src="vendor/jquery.wow.min.js"></script>
+
+        <!-- General Components and Settings -->
+        <script type="text/javascript" src="js/global.min.js"></script>
+        <script type="text/javascript" src="js/components/header-sticky.min.js"></script>
+        <script type="text/javascript" src="js/components/scrollbar.min.js"></script>
+        <script type="text/javascript" src="js/components/swiper.min.js"></script>
+        <script type="text/javascript" src="js/components/portfolio-3-col.min.js"></script>
+        <script type="text/javascript" src="js/components/wow.min.js"></script>
+        <!--========== END JAVASCRIPTS ==========-->
+
+    </body>
+    <!-- End Body -->
+</html>
+''']
+
+sampleString1='''<div class=\"s-portfolio__item cbp-item DepartmentsName\">
+                    <div class=\"s-portfolio__img-effect\">
+                        <img src=\"img/displayName\.jpg" alt=\"displayName\">
+                    </div>
+                    <div class=\"s-portfolio__caption-hover--cc\">
+                        <div class=\"g-margin-b-25--xs\">
+                            <h3 class=\"g-font-size-18--xs g-color--white g-margin-b-5--xs\">displayName</h3>
+                            <p class=\"g-color--white-opacity\">coments</p>
+                        </div>
+                        <ul class=\"list-inline g-ul-li-lr-5--xs g-margin-b-0--xs\">
+                            <li>
+                                <a href=\"img/displayName.jpg\" class=\"cbp-lightbox s-icon s-icon--sm s-icon--white-bg g-radius--circle\" data-title=\"DisplayName\">
+                                    <i class=\"ti-fullscreen\"></i>
+                                </a>
+                            </li>
+
+                            <!--なにかみせたいリンクがあればここに。なければ li ごと消してください。-->
+                            <li>
+                                <a href=\"links\" class=\"s-icon s-icon--sm s-icon s-icon--white-bg g-radius--circle\">
+                                    <i class=\"ti-link\"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                '''
+
+sampleString2='''<div class=\"s-portfolio__item cbp-item DepartmentsName\">
+                    <div class=\"s-portfolio__img-effect\">
+                        <img src=\"img/displayName.jpg\" alt=\"displayName\">
+                    </div>
+                    <div class=\"s-portfolio__caption-hover--cc\">
+                        <div class=\"g-margin-b-25--xs\">
+                            <h3 class=\"g-font-size-18--xs g-color--white g-margin-b-5--xs\">displayName</h3>
+                            <p class=\"g-color--white-opacity\">coments</p>
+                        </div>
+                        <ul class=\"list-inline g-ul-li-lr-5--xs g-margin-b-0--xs\">
+                            <li>
+                                <a href=\"img/displayName.jpg\" class=\"cbp-lightbox s-icon s-icon--sm s-icon--white-bg g-radius--circle\" data-title=\"DisplayName\">
+                                    <i class=\"ti-fullscreen\"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                '''
+
+resultStrings=[]
+
+args = sys.argv
+
+if(args[1]==""):
+    print("ファイルをコマンドライン引数にて指定してください。")
+    sys.exit()
+
+filePath=args[1]
+root, ext = os.path.splitext(filePath)
+
+if(not ext==".csv"):
+    print("csvファイルを指定してください。")
+    sys.exit()
+
+with open(root+ext, encoding="utf_8") as data:
+    h=next(csv.reader(data))
+
+    for row in csv.reader(data):
+        tmpString=sampleString1 if  row[4]=="" else sampleString2
+        urllib.request.urlretrieve(urlConv(row[4]),os.path.dirname(__file__)+'\img\\'+row[1]+'.jpg')
+        for i in range(5):
+            if( not(i == 2)):
+                tmpString=re.sub(replacedNames[i],row[i+1],tmpString)
+            elif(i==2):
+                tmpString=re.sub(replacedNames[i],departmentDict[row[i+1]],tmpString)
+
+        resultStrings.append(tmpString)
+
+resulttxt=wholeString[0]
+for result in resultStrings:
+    resulttxt+=result
+resulttxt+=wholeString[1]
+
+print(resulttxt)
+
+with open(os.path.dirname(__file__)+'/index.txt', mode='w') as f:
+    f.write(resulttxt)
