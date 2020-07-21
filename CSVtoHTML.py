@@ -285,7 +285,6 @@ wholeString=['''<!DOCTYPE html>
                 <!-- End Item -->
 ''',
 '''
-                <!-- End Item -->
             </div>
             <!-- End Portfolio Gallery -->
         </div>
@@ -403,6 +402,9 @@ if(not ext==".csv"):
     print("csvファイルを指定してください。")
     sys.exit()
 
+with open(os.path.dirname(__file__)+'\index.html', encoding='utf-8') as code:
+    wholeString[0]=re.sub(wholeString[1],'',wholeString[0])
+
 with open(root+ext, encoding="utf_8") as data:
     h=next(csv.reader(data))
     h=next(csv.reader(data))
@@ -410,9 +412,11 @@ with open(root+ext, encoding="utf_8") as data:
     for row in csv.reader(data):
         tmpString=sampleString1 if  row[4]=="" else sampleString2
         print(row)
+        row[1]=re.sub(r'[\\/:*?"<>|]+','',row[1])
         urllib.request.urlretrieve(urlConv(row[4]),os.path.dirname(__file__)+'\img\\'+row[1]+'.jpg')
         for i in range(5):
             if( not(i == 2)):
+                print(row[i+1])
                 tmpString=re.sub(replacedNames[i],row[i+1],tmpString)
             elif(i==2):
                 replacement=""
