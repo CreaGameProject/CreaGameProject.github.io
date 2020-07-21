@@ -2131,6 +2131,7 @@ fieldset[disabled] .s-btn {
 .s-portfolio__img-effect {
   position: relative;
   display: block;
+  min-height: 24em;
 }
 
 .s-portfolio__img-effect:after {
