@@ -352,7 +352,7 @@ sampleString1='''<div class=\"s-portfolio__item cbp-item DepartmentsName\">
                         </div>
                         <ul class=\"list-inline g-ul-li-lr-5--xs g-margin-b-0--xs\">
                             <li>
-                                <a href=\"img/displayName.jpg\" class=\"cbp-lightbox s-icon s-icon--sm s-icon--white-bg g-radius--circle\" data-title=\"DisplayName\">
+                                <a href=\"img/displayName.jpg\" class=\"cbp-lightbox s-icon s-icon--sm s-icon--white-bg g-radius--circle\" data-title=\"displayName\">
                                     <i class=\"ti-fullscreen\"></i>
                                 </a>
                             </li>
@@ -379,7 +379,7 @@ sampleString2='''<div class=\"s-portfolio__item cbp-item DepartmentsName\">
                         </div>
                         <ul class=\"list-inline g-ul-li-lr-5--xs g-margin-b-0--xs\">
                             <li>
-                                <a href=\"img/displayName.jpg\" class=\"cbp-lightbox s-icon s-icon--sm s-icon--white-bg g-radius--circle\" data-title=\"DisplayName\">
+                                <a href=\"img/displayName.jpg\" class=\"cbp-lightbox s-icon s-icon--sm s-icon--white-bg g-radius--circle\" data-title=\"displayName\">
                                     <i class=\"ti-fullscreen\"></i>
                                 </a>
                             </li>
