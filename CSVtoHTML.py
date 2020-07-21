@@ -92,7 +92,7 @@ wholeString=['',
 
 sampleString1='''<div class=\"s-portfolio__item cbp-item DepartmentsName\">
                     <div class=\"s-portfolio__img-effect\">
-                        <img src=\"img/displayName\.jpg" alt=\"displayName\">
+                        <img src=\"img/displayName.jpg" alt=\"displayName\">
                     </div>
                     <div class=\"s-portfolio__caption-hover--cc\">
                         <div class=\"g-margin-b-25--xs\">
@@ -168,9 +168,9 @@ with open(root+ext, encoding="utf_8") as data:
     h=next(csv.reader(data))
 
     for row in csv.reader(data):
-        tmpString=sampleString1 if  row[4]=="" else sampleString2
-        print(row)
+        tmpString = sampleString2 if  row[4]=="" else sampleString1
         row[1]=re.sub(r'[\\/:*?"<>|]+','',row[1])
+        print(row[1])
         urllib.request.urlretrieve(urlConv(row[4]),os.path.dirname(__file__)+'\img\\'+row[1]+'.jpg')
         for i in range(5):
             if( not(i == 2)):
