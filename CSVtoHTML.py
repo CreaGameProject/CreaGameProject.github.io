@@ -260,6 +260,29 @@ wholeString=['''<!DOCTYPE html>
                         </ul>
                     </div>
                 </div>
+                <!-- Item4 -->
+                <!--部門は例にならって記入してください！！　↓ これらのこと。-->
+                <div class="s-portfolio__item cbp-item prog sound">
+                    <div class="s-portfolio__img-effect">
+                        <img src="img/nakano_prof.jpg" alt="Nakano(Pr, SC)">
+                    </div>
+                    <div class="s-portfolio__caption-hover--cc">
+                        <div class="g-margin-b-25--xs">
+                            <h4 class="g-font-size-18--xs g-color--white g-margin-b-5--xs">中野</h4>
+                            <p class="g-color--white-opacity">プログラムかサウンドに関して困ったことがあれば気軽に聞いてもらえると嬉しいです。<br>音楽はポストロックとドラムンベースが好きです。</p>
+                        </div>
+                        <ul class="list-inline g-ul-li-lr-5--xs g-margin-b-0--xs">
+                            <li>
+                                <a href="img/nakano_prof.jpg" class="cbp-lightbox s-icon s-icon--sm s-icon--white-bg g-radius--circle" data-title="適当なブラシで適当に塗りたくったやつ">
+                                    <i class="ti-fullscreen"></i>
+                                </a>
+                            </li>
+
+                            <!--なにかみせたいリンクがあればここに。なければ li ごと消してください。-->
+                        </ul>
+                    </div>
+                </div>
+                <!-- End Item -->
 ''',
 '''
                 <!-- End Item -->
@@ -382,15 +405,21 @@ if(not ext==".csv"):
 
 with open(root+ext, encoding="utf_8") as data:
     h=next(csv.reader(data))
+    h=next(csv.reader(data))
 
     for row in csv.reader(data):
         tmpString=sampleString1 if  row[4]=="" else sampleString2
+        print(row)
         urllib.request.urlretrieve(urlConv(row[4]),os.path.dirname(__file__)+'\img\\'+row[1]+'.jpg')
         for i in range(5):
             if( not(i == 2)):
                 tmpString=re.sub(replacedNames[i],row[i+1],tmpString)
             elif(i==2):
-                tmpString=re.sub(replacedNames[i],departmentDict[row[i+1]],tmpString)
+                replacement=""
+                for depertment in row[i+1].split(', '):
+                    replacement+=' '+departmentDict[depertment]
+                
+                tmpString=re.sub(replacedNames[i],replacement,tmpString)
 
         resultStrings.append(tmpString)
 
@@ -401,5 +430,5 @@ resulttxt+=wholeString[1]
 
 print(resulttxt)
 
-with open(os.path.dirname(__file__)+'/index.html', mode='w') as f:
+with open(os.path.dirname(__file__)+'/index.html', mode='w',encoding='utf-8') as f:
     f.write(resulttxt)
